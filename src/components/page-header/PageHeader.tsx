@@ -26,7 +26,7 @@ export function PageHeader({ title, breadcrumbs, actionButton }: PageHeaderProps
     <div className="">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+          <h1 className="text-gray-900 text-[24px] leading-[120%] font-semibold">{title}</h1>
           
           {breadcrumbs && breadcrumbs.length > 0 && (
             <nav className="flex items-center space-x-1 text-sm">

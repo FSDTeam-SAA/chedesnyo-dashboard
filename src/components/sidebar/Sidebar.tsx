@@ -9,21 +9,12 @@ import {
   Grip,
   ShoppingBasket,
 } from "lucide-react";
-// import Image from "next/image";
-// import logoImage from "@/public/images/logo.svg";
+import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  {
-    name: "Requested Products",
-    href: "/requested-product",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Approved Products",
-    href: "/approved-product",
-    icon: LayoutDashboard,
-  },
+  { name: "Requested Products", href: "/requested-product", icon: LayoutDashboard },
+  { name: "Approved Products", href: "/approved-product", icon: LayoutDashboard },
   { name: "Main Category", href: "/category", icon: Grip },
   { name: "Sub Category", href: "/sub-category", icon: ShoppingBasket },
   { name: "SR Category List", href: "/sr-category", icon: ShoppingBasket },
@@ -33,31 +24,21 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen sticky bottom-0 top-0 w-[350px] flex-col bg-[#212121] z-50">
+    <div className="flex h-screen sticky top-0 w-[350px] flex-col z-50 shadow-[0px_16px_48px_0px_#00000029] bg-gray-50">
       {/* Logo */}
-      {/* <div className="h-[80px] flex items-center justify-start shadow-md ml-3">
-        <div className="text-2xl flex gap-1 font-bold text-blue-600 uppercase tracking-wider">
-          <div className="h-[50px] w-[50px]">
-            <Image
-              src="/images/dashboardLogo.gif"
-              alt=""
-              height={200}
-              width={200}
-              className="object-cover"
-            />
-          </div>
-          <div>
-            <h1 className="text-green-500">
-              T<span className="text-red-400">O</span>MAT
-              <span className="text-red-400">O</span>
-            </h1>
-            <p className="text-white text-[10px]">Tomaot.LID</p>
-          </div>
+      <div className="h-[100px] flex items-center justify-center px-4 my-7">
+        <div className="h-full w-32 relative">
+          <Image
+            src="/images/chedsnyoLogo.png"
+            alt="Logo"
+            fill
+            className="object-contain"
+          />
         </div>
-      </div> */}
+      </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-4 flex flex-col items-center justify-start px-3 overflow-y-auto mt-3">
+      <nav className="flex-1 space-y-4 flex flex-col items-center justify-start overflow-y-auto mt-3">
         {navigation.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -68,10 +49,10 @@ export function Sidebar() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex w-[90%] mx-auto items-center justify-start gap-2 space-y-1 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                "flex w-full mx-auto items-center justify-start gap-3 px-5 py-3.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-white text-black"
-                  : "text-slate-300 hover:bg-slate-600/50 hover:text-white"
+                  ? "bg-[#0080001A] text-black"
+                  : "text-slate-400 hover:bg-slate-600/50 hover:text-white"
               )}
             >
               <item.icon
@@ -82,7 +63,7 @@ export function Sidebar() {
               />
               <span
                 className={cn(
-                  "font-normal text-base leading-[120%] transition-colors duration-200 text-center",
+                  "font-normal text-[20px] leading-[120%] transition-colors duration-200",
                   isActive ? "text-black font-medium" : ""
                 )}
               >
@@ -95,7 +76,7 @@ export function Sidebar() {
 
       {/* Logout fixed at bottom */}
       <div className="p-3">
-        <div className="flex items-center justify-start space-y-1 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white cursor-pointer">
+        <div className="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white cursor-pointer">
           <LogOut className="h-5 w-5" />
           <span className="font-normal text-base leading-[120%]">Log Out</span>
         </div>

@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, Lock, LogOut } from "lucide-react";
-// import ChangePasswordModal from "./ChangePasswordModal";
 import Link from "next/link";
 export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -51,7 +50,7 @@ export default function Header() {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex h-[80px] items-center justify-between px-6 bg-[#212121] shadow-md">
+    <div className="fixed top-0 left-0 right-0 z-50 flex h-[100px] items-center justify-between px-6 shadow">
       <div className="flex items-center space-x-2"></div>
 
       <div className="relative flex items-center space-x-3">
