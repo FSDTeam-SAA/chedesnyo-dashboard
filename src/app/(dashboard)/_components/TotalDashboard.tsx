@@ -4,7 +4,7 @@ import EarningsOverviewChart from './EarningsChart'
 
 function TotalDashboard() {
   return (
-    <div className='pt-7 px-2'>
+    <div className=''>
         <OverViewCard />
         <EarningsOverviewChart />
     </div>

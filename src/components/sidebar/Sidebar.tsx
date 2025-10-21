@@ -13,7 +13,7 @@ import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Requested Products", href: "/requested-product", icon: LayoutDashboard },
+  { name: "Revenue from Sales user", href: "/revenue-sales-user", icon: LayoutDashboard },
   { name: "Approved Products", href: "/approved-product", icon: LayoutDashboard },
   { name: "Main Category", href: "/category", icon: Grip },
   { name: "Sub Category", href: "/sub-category", icon: ShoppingBasket },
@@ -24,7 +24,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen sticky top-0 w-[350px] flex-col z-50 shadow-[0px_16px_48px_0px_#00000029] bg-gray-50">
+    <div className="flex h-screen sticky top-0 w-[390px] flex-col z-50 shadow-[0px_16px_48px_0px_#00000029] bg-gray-50">
       {/* Logo */}
       <div className="h-[100px] flex items-center justify-center px-4 my-7">
         <div className="h-full w-32 relative">
@@ -51,20 +51,20 @@ export function Sidebar() {
               className={cn(
                 "flex w-full mx-auto items-center justify-start gap-3 px-5 py-3.5 text-sm font-medium transition-all duration-200",
                 isActive
-                  ? "bg-[#0080001A] text-black"
-                  : "text-slate-400 hover:bg-slate-600/50 hover:text-white"
+                  ? "bg-[#0080001A] text-[#008000]"
+                  : "text-[#5B6574] hover:bg-slate-600/50 hover:text-white"
               )}
             >
               <item.icon
                 className={cn(
                   "h-6 w-6 transition-colors duration-200",
-                  isActive ? "text-black" : ""
+                  isActive ? "text-[#008000]" : ""
                 )}
               />
               <span
                 className={cn(
                   "font-normal text-[20px] leading-[120%] transition-colors duration-200",
-                  isActive ? "text-black font-medium" : ""
+                  isActive ? "text-[#008000] font-medium" : ""
                 )}
               >
                 {item.name}
