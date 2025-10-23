@@ -14,7 +14,7 @@ import Image from "next/image";
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Revenue from Sales user", href: "/revenue-sales-user", icon: LayoutDashboard },
-  { name: "Approved Products", href: "/approved-product", icon: LayoutDashboard },
+  { name: "Assignments Request", href: "/assignments-request", icon: LayoutDashboard },
   { name: "Main Category", href: "/category", icon: Grip },
   { name: "Sub Category", href: "/sub-category", icon: ShoppingBasket },
   { name: "SR Category List", href: "/sr-category", icon: ShoppingBasket },

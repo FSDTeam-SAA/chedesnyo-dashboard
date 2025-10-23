@@ -102,7 +102,7 @@ function RevenueFromSalesUser() {
         <div className="overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow className="bg-green-50 border-b border-gray-200 rounded-t-lg">
+              <TableRow className="bg-[#0080001A] border-b border-gray-200 rounded-t-lg">
                 <TableHead className="font-semibold text-gray-900 text-[18px] py-5 text-center px-6 rounded-tl-lg">
                   User ID
                 </TableHead>
