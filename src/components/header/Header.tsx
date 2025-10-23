@@ -38,6 +38,8 @@ export default function Header() {
     setIsDropdownOpen(false);
   };
 
+  
+
   const handleChangePassword = () => {
     console.log("Navigate to Change Password");
     setIsDropdownOpen(false);
