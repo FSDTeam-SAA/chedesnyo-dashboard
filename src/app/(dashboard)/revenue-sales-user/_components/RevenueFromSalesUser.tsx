@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Table,
   TableBody,
@@ -11,64 +12,53 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/page-header/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
-
-// Dummy data for the table
-const salesData = [
-  {
-    userId: "112",
-    userName: "Mr. X",
-    totalServicePrice: "$180",
-    revenue: "$18",
-  },
-  {
-    userId: "112",
-    userName: "Mr. X",
-    totalServicePrice: "$180",
-    revenue: "$18",
-  },
-  {
-    userId: "112",
-    userName: "Mr. X",
-    totalServicePrice: "$180",
-    revenue: "$18",
-  },
-  {
-    userId: "112",
-    userName: "Mr. X",
-    totalServicePrice: "$180",
-    revenue: "$18",
-  },
-  {
-    userId: "112",
-    userName: "Mr. X",
-    totalServicePrice: "$180",
-    revenue: "$18",
-  },
-  {
-    userId: "113",
-    userName: "Mr. Y",
-    totalServicePrice: "$220",
-    revenue: "$22",
-  },
-  {
-    userId: "114",
-    userName: "Mr. Z",
-    totalServicePrice: "$150",
-    revenue: "$15",
-  },
-  {
-    userId: "115",
-    userName: "Ms. A",
-    totalServicePrice: "$190",
-    revenue: "$19",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { RevenueItem } from "../../../../../Types/revenueItem";
+import { useSession } from "next-auth/react";
 
 function RevenueFromSalesUser() {
-  const totalResults = salesData.length;
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
+  const session = useSession();
+  const user = session?.data?.user;
+  const TOKEN = user?.accessToken;
+  console.log(session)
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["revenueData", page],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/payment?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`, // add token here
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch revenue data");
+      return res.json();
+    },
+  });
+
+  if (isLoading) return <p className="text-center mt-10">Loading...</p>;
+  if (error)
+    return (
+      <p className="text-center mt-10">Error: {error.message || "Something went wrong"}</p>
+    );
+
+  const revenueData = data?.data || [];
+  const totalResults = data?.meta?.total || 0;
+  const totalPages = Math.ceil(totalResults / limit);
+
+  // Calculate total revenue from adminFree
+  const totalRevenue = revenueData.reduce((acc: number, item:RevenueItem ) => acc + (item.adminFree || 0), 0);
 
   return (
-    <div>
+    <div className="">
       <div className="flex justify-between items-center mb-[48px]">
         <div>
           <PageHeader
@@ -90,15 +80,15 @@ function RevenueFromSalesUser() {
                       Total Revenue
                     </p>
                   </div>
-                  <p className="text-[16px] ml-5 font-normal text-white mt-1">$12,650</p>
+                  <p className="text-[16px] ml-5 font-normal text-white mt-1">${totalRevenue}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
+
       <div className="w-full bg-white rounded-lg shadow-sm">
-        {/* Table Container */}
         <div className="overflow-hidden">
           <Table>
             <TableHeader>
@@ -117,23 +107,24 @@ function RevenueFromSalesUser() {
                 </TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {salesData.map((item, index) => (
+              {revenueData.map((item: RevenueItem, index: number) => (
                 <TableRow
                   key={index}
                   className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                 >
                   <TableCell className="text-[18px] text-gray-700 py-5 px-6 text-center">
-                    {item.userId}
+                    {item.user._id}
                   </TableCell>
                   <TableCell className="text-[18px] text-gray-700 py-5 px-6 text-center">
-                    {item.userName}
+                    {item.user.firstName} {item.user.lastName}
                   </TableCell>
                   <TableCell className="text-[18px] text-gray-700 py-5 px-6 text-center">
-                    {item.totalServicePrice}
+                    ${item.amount}
                   </TableCell>
                   <TableCell className="text-[18px] text-gray-700 py-5 px-6 text-center">
-                    {item.revenue}
+                    ${item.adminFree}
                   </TableCell>
                 </TableRow>
               ))}
@@ -141,10 +132,11 @@ function RevenueFromSalesUser() {
           </Table>
         </div>
 
-        {/* Static Pagination Design Only */}
+        {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
           <p className="text-sm text-gray-600">
-            Showing 1 to {totalResults} of {totalResults} results
+            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, totalResults)} of{" "}
+            {totalResults} results
           </p>
 
           <div className="flex items-center gap-2">
@@ -152,24 +144,24 @@ function RevenueFromSalesUser() {
               variant="outline"
               size="icon"
               className="h-9 w-9 bg-white border-gray-300"
-              disabled
+              onClick={() => setPage(Math.max(page - 1, 1))}
+              disabled={page === 1}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
-            {[1, 2, 3, "...", 10].map((page, index) => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
               <Button
-                key={index}
-                variant={page === 1 ? "default" : "outline"}
+                key={p}
+                variant={p === page ? "default" : "outline"}
                 size="icon"
-                className={`h-9 w-9 ${
-                  page === 1
+                className={`h-9 w-9 ${p === page
                     ? "bg-green-700 hover:bg-green-800 text-white border-green-700"
                     : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                }`}
-                disabled
+                  }`}
+                onClick={() => setPage(p)}
               >
-                {page}
+                {p}
               </Button>
             ))}
 
@@ -177,7 +169,8 @@ function RevenueFromSalesUser() {
               variant="outline"
               size="icon"
               className="h-9 w-9 bg-white border-gray-300"
-              disabled
+              onClick={() => setPage(Math.min(page + 1, totalPages))}
+              disabled={page === totalPages}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
