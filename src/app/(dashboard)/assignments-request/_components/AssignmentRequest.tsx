@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Eye, CircleCheckBig } from "lucide-react";
+import { ChevronLeft, ChevronRight, CircleCheckBig } from "lucide-react";
 import { PageHeader } from "@/components/page-header/PageHeader";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSession } from "next-auth/react";
+import { AssignmentDialog } from "@/components/Dialog/AssignmentDialog";
 
 type Assignment = {
   _id: string;
@@ -93,9 +94,6 @@ function AssignmentRequest() {
   const handleCancel = (id: string) => {
     updateStatusMutation.mutate({ id, status: "rejected" });
   };
-
-  const handleDownload = (id: string, title: string) =>
-    console.log(`Downloading assignment ${id}: ${title}`);
 
   if (isLoading) return <p className="text-center mt-10">Loading...</p>;
   if (error) return <p className="text-center mt-10">Error: {(error as Error).message}</p>;
@@ -219,13 +217,14 @@ function AssignmentRequest() {
                         </>
                       ) : null}
 
-                      <Button
+                      {/* <Button
                         size="sm"
                         className="bg-green-600 hover:bg-green-700 text-white p-1 h-7 w-7 rounded"
                         onClick={() => handleDownload(item._id, item.title)}
                       >
                         <Eye className="h-3.5 w-3.5" />
-                      </Button>
+                      </Button> */}
+                      <AssignmentDialog assigmentId={item._id} />
                     </div>
                   </TableCell>
                 </TableRow>
