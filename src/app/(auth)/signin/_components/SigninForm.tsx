@@ -89,7 +89,7 @@ function SigninForm() {
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
+        <div className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {/* Email Field */}
@@ -186,7 +186,7 @@ function SigninForm() {
               </Button>
             </form>
           </Form>
-        </CardContent>
+        </div>
       </Card>
     </div>
   );
