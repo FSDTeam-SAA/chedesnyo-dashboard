@@ -2,9 +2,9 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
-import { User, Lock, LogOut } from "lucide-react";
-import Link from "next/link";
+// import { Card, CardContent } from "@/components/ui/card";
+// import { User, Lock, LogOut } from "lucide-react";
+// import Link from "next/link";
 export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -31,24 +31,6 @@ export default function Header() {
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
-  };
-
-  const handlePersonalInformation = () => {
-    console.log("Navigate to Personal Information");
-    setIsDropdownOpen(false);
-  };
-
-  
-
-  const handleChangePassword = () => {
-    console.log("Navigate to Change Password");
-    setIsDropdownOpen(false);
-    // setIsOpen(true);
-  };
-
-  const handleSignOut = () => {
-    console.log("Sign out user");
-    setIsDropdownOpen(false);
   };
 
   return (

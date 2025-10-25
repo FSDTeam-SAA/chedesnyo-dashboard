@@ -9,8 +9,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { PageHeader } from "@/components/page-header/PageHeader";
-import { Card, CardContent } from "@/components/ui/card";
+// import { PageHeader } from "@/components/page-header/PageHeader";
+// import { Card, CardContent } from "@/components/ui/card";
 
 // Updated data for the table matching the images
 const salesData = [

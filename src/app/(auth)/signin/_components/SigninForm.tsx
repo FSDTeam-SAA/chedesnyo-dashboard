@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -12,7 +11,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -26,17 +24,22 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  rememberMe: z.boolean().default(false),
+  rememberMe: z.boolean().catch(false),
 });
 
 function SigninForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -45,19 +48,40 @@ function SigninForm() {
     },
   });
 
-  const onSubmit = (data:any) => {
-    toast.success("Login successful!", {
-      description: `Welcome back, ${data.email}`,
-      position: "bottom-right",
-    });
-    console.log("Login data:", data);
+  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      setIsLoading(true);
+
+      const res = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        throw new Error(res.error);
+      }
+
+      toast.success("Login successful!");
+      router.push("/");
+    } catch (err) {
+      // Safely handle unknown errors by narrowing to Error or string
+      const message =
+        err instanceof Error ? err.message : typeof err === "string" ? err : "Something went wrong!";
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+
+  const rememberMeChecked = form.watch("rememberMe");
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-sm">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-2xl font-semibold text-green-700">
+        <CardHeader className="text-center space-y-1">
+          <CardTitle className="text-[40px] font-bold text-[#008000]">
             Welcome
           </CardTitle>
           <CardDescription className="text-sm">
@@ -80,6 +104,7 @@ function SigninForm() {
                         type="email"
                         placeholder="hello@example.com"
                         {...field}
+                        disabled={isLoading}
                       />
                     </FormControl>
                     <FormMessage />
@@ -101,6 +126,7 @@ function SigninForm() {
                           placeholder="••••••••"
                           className="pr-10"
                           {...field}
+                          disabled={isLoading}
                         />
                         <button
                           type="button"
@@ -139,38 +165,28 @@ function SigninForm() {
                     </FormItem>
                   )}
                 />
-                <Button
-                  type="button"
-                  variant="link"
-                  className="text-green-600 hover:text-green-700 p-0 h-auto font-medium"
-                >
-                  Forgot password?
-                </Button>
+                <Link href="/forgot-password">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-green-600 hover:text-green-700 p-0 h-auto font-medium"
+                  >
+                    Forgot password?
+                  </Button>
+                </Link>
               </div>
 
               {/* Submit Button */}
               <Button
                 type="submit"
                 className="w-full bg-green-700 hover:bg-green-800"
+                disabled={isLoading || !rememberMeChecked} // ✅ Disable if rememberMe is not checked
               >
-                Log In
+                {isLoading ? "Logging in..." : "Log In"}
               </Button>
             </form>
           </Form>
         </CardContent>
-
-        <CardFooter className="justify-center">
-          <div className="text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
-            <Button
-              type="button"
-              variant="link"
-              className="text-green-600 hover:text-green-700 p-0 h-auto font-medium"
-            >
-              Sign Up
-            </Button>
-          </div>
-        </CardFooter>
       </Card>
     </div>
   );

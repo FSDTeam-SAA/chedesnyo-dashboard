@@ -137,16 +137,16 @@ function AllBusinessUser() {
 }
 
 // 🧩 Component for Request Business Users
-function RequestBusinessUser() {
-  return (
-    <div className="w-full bg-white rounded-lg shadow-sm p-10 text-center text-gray-700">
-      <h2 className="text-2xl font-semibold mb-3">Request Business Users</h2>
-      <p className="text-gray-500">
-        Here you can manage and review new business user requests.
-      </p>
-    </div>
-  );
-}
+// function RequestBusinessUser() {
+//   return (
+//     <div className="w-full bg-white rounded-lg shadow-sm p-10 text-center text-gray-700">
+//       <h2 className="text-2xl font-semibold mb-3">Request Business Users</h2>
+//       <p className="text-gray-500">
+//         Here you can manage and review new business user requests.
+//       </p>
+//     </div>
+//   );
+// }
 
 export default function BusinessUser() {
   const [activeTab, setActiveTab] = useState<"all" | "request">("all");

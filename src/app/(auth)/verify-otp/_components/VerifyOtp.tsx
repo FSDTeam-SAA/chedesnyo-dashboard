@@ -18,8 +18,14 @@ import {
 } from "@/components/ui/card";
 import { Clock } from "lucide-react";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 
 function VerifyOtp() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
+
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState<number>(59);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -71,17 +77,53 @@ function VerifyOtp() {
     inputRefs.current[nextIndex]?.focus();
   };
 
+  const otpMutation = useMutation({
+    mutationFn: async (bodyData: { email: string; otp: string }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/verify-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.message || "OTP verification failed");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "OTP verified successfully");
+      console.log("Reset Token:", data?.resetToken);
+      localStorage.setItem("refreshToken", data?.resetToken);
+      router.push(`/change-password?email=${email}`);
+    },
+    onError: (err) => {
+      toast.error(err.message || "Invalid OTP, try again");
+    },
+  });
+
   // Handle Verify button click
   const handleVerify = () => {
+    if (!email) {
+      toast.error("Email not found in URL");
+      return;
+    }
+
+    const otpValue = otp.join("");
+    if (otpValue.length < 6) {
+      toast.error("Please enter all 6 digits");
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => {
-      toast.success("OTP Verified!", {
-        description: "Your email has been successfully verified.",
-        position: "bottom-right",
-      });
-      console.log("Verifying OTP:", otp.join(""));
-      setIsLoading(false);
-    }, 1500);
+    otpMutation.mutate({ email, otp: otpValue });
+    setIsLoading(false);
   };
 
   // Handle Resend OTP
@@ -128,31 +170,26 @@ function VerifyOtp() {
                   }
                   onKeyDown={(e) => handleKeyDown(index, e)}
                   onPaste={handlePaste}
-                  className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-md transition-all focus:ring-2 ${
-                    digit
+                  className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-md transition-all focus:ring-2 ${digit
                       ? "border-green-600 focus:ring-green-500"
                       : "border-gray-300 focus:border-green-500"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
 
-            {/* Timer & Resend */}
+            {/* Timer & Info */}
             <div className="flex items-center justify-between text-sm text-gray-600">
               <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
                 <span>00:{timer.toString().padStart(2, "0")}</span>
               </div>
-              <div>
-                Didn&apos;t get a code?{" "}
-                <button
-                  onClick={handleResend}
-                  disabled={timer > 0}
-                  className="text-green-700 font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Resend
-                </button>
-              </div>
+            </div>
+
+            <div className="text-center my-4">
+              <p className="text-gray-700 text-sm md:text-sm font-medium">
+                Type your exact OTP
+              </p>
             </div>
 
             {/* Verify Button */}
@@ -163,6 +200,17 @@ function VerifyOtp() {
             >
               {isLoading ? "Verifying..." : "Verify"}
             </Button>
+
+            {/* Resend OTP */}
+            <div className="text-center mt-2">
+              <button
+                onClick={handleResend}
+                disabled={timer > 0}
+                className="text-green-700 font-medium hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Resend OTP
+              </button>
+            </div>
           </div>
         </CardContent>
       </Card>

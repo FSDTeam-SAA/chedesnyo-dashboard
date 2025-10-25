@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -22,6 +22,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Minimal Form Schema
 const formSchema = z
@@ -35,6 +37,11 @@ const formSchema = z
   });
 
 function ChangePassword() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email") || "";
+  const resetToken = localStorage.getItem("refreshToken") || "";
+
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -46,14 +53,53 @@ function ChangePassword() {
     },
   });
 
+  const restPasswordMutation = useMutation({
+    mutationFn: async (bodyData: {
+      email: string;
+      newPassword: string;
+      resetToken: string;
+    }) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/auth/reset-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData?.message || "Password reset failed");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "Password reset successful");
+      router.push("/signin");
+    },
+    onError: (err) => {
+      toast.error(err.message || "Failed to reset password");
+    },
+  });
+
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    toast.success("Password changed successfully!", {
-      description: "Your password has been updated",
-      position: "bottom-right",
+    if (!email || !resetToken) {
+      toast.error("Email or reset token missing!");
+      return;
+    }
+
+    restPasswordMutation.mutate({
+      email,
+      newPassword: data.newPassword,
+      resetToken,
     });
-    console.log("Password change data:", data);
-    form.reset();
   };
+
+  const isLoading = restPasswordMutation.isPending;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -84,13 +130,18 @@ function ChangePassword() {
                           placeholder="••••••••"
                           className="pr-10"
                           {...field}
+                          disabled={isLoading}
                         />
                         <button
                           type="button"
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                          {showNewPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          {showNewPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
                         </button>
                       </div>
                     </FormControl>
@@ -113,13 +164,18 @@ function ChangePassword() {
                           placeholder="••••••••"
                           className="pr-10"
                           {...field}
+                          disabled={isLoading}
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                          {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                          {showConfirmPassword ? (
+                            <EyeOff className="w-5 h-5" />
+                          ) : (
+                            <Eye className="w-5 h-5" />
+                          )}
                         </button>
                       </div>
                     </FormControl>
@@ -129,8 +185,12 @@ function ChangePassword() {
               />
 
               {/* Submit */}
-              <Button type="submit" className="w-full bg-green-700 hover:bg-green-800">
-                Change Password
+              <Button
+                type="submit"
+                className="w-full bg-green-700 hover:bg-green-800"
+                disabled={isLoading}
+              >
+                {isLoading ? "Updating..." : "Change Password"}
               </Button>
             </form>
           </Form>
