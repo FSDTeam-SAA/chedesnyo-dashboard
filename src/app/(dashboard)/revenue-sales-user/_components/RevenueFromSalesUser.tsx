@@ -19,7 +19,7 @@ import { useSession } from "next-auth/react";
 
 function RevenueFromSalesUser() {
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = 8;
 
   const session = useSession();
   const user = session?.data?.user;

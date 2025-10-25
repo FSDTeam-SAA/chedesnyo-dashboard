@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,102 +10,99 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Eye, CircleCheckBig } from "lucide-react";
 import { PageHeader } from "@/components/page-header/PageHeader";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useSession } from "next-auth/react";
 
-// Dummy data for the table
-const assignmentData = [
-  {
-    id: 1,
-    title: "Web Development",
-    sellerName: "Darrell Steward",
-    sellerAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Darrell",
-    price: "$8.00",
-    discountPrice: "$0.25",
-    date: "04/21/2025",
-    time: "03:18pm",
-  },
-  {
-    id: 2,
-    title: "Web Development",
-    sellerName: "Theresa Webb",
-    sellerAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Theresa",
-    price: "$8.00",
-    discountPrice: "$0.25",
-    date: "04/21/2025",
-    time: "03:18pm",
-  },
-  {
-    id: 3,
-    title: "Web Development",
-    sellerName: "Cameron Williamson",
-    sellerAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Cameron",
-    price: "$8.00",
-    discountPrice: "$0.25",
-    date: "04/21/2025",
-    time: "03:18pm",
-  },
-  {
-    id: 4,
-    title: "Web Development",
-    sellerName: "Ronald Richards",
-    sellerAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ronald",
-    price: "$8.00",
-    discountPrice: "$0.25",
-    date: "04/21/2025",
-    time: "03:18pm",
-  },
-  {
-    id: 5,
-    title: "Web Development",
-    sellerName: "Floyd Miles",
-    sellerAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Floyd",
-    price: "$8.00",
-    discountPrice: "$0.25",
-    date: "04/21/2025",
-    time: "03:18pm",
-  },
-  {
-    id: 5,
-    title: "Web Development",
-    sellerName: "Floyd Miles",
-    sellerAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Floyd",
-    price: "$8.00",
-    discountPrice: "$0.25",
-    date: "04/21/2025",
-    time: "03:18pm",
-  },
-  {
-    id: 5,
-    title: "Web Development",
-    sellerName: "Floyd Miles",
-    sellerAvatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Floyd",
-    price: "$8.00",
-    discountPrice: "$0.25",
-    date: "04/21/2025",
-    time: "03:18pm",
-  },
-  
-];
+type Assignment = {
+  _id: string;
+  banner: string;
+  title: string;
+  description: string;
+  budget: string;
+  priceType: string;
+  paymentMethod: string;
+  deadLine: string;
+  uploadFile: string;
+  user: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    profileImage: string;
+  };
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 function AssignmentRequest() {
-  const handleApprove = (id: number, name: string) => {
-    console.log(`Approved assignment ${id} for ${name}`);
+  const [page, setPage] = useState(1);
+  const [filterStatus, setFilterStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const limit = 7;
+  const queryClient = useQueryClient();
+  const session = useSession();
+  const TOKEN = session?.data?.user?.accessToken;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["assignment", page, filterStatus],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/assigment?page=${page}&limit=${limit}&status=${filterStatus}`
+      );
+      if (!res.ok) throw new Error("Failed to fetch assignments");
+      return res.json();
+    },
+  });
+
+  const assignmentData: Assignment[] = data?.data || [];
+  const totalResults = data?.meta?.total || 0;
+  const totalPages = Math.ceil(totalResults / limit);
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/assigment/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["assignment", page, filterStatus] });
+    },
+  });
+
+  const handleApprove = (id: string) => {
+    updateStatusMutation.mutate({ id, status: "approved" });
   };
 
-  const handleCancel = (id: number, name: string) => {
-    console.log(`Cancelled assignment ${id} for ${name}`);
+  const handleCancel = (id: string) => {
+    updateStatusMutation.mutate({ id, status: "rejected" });
   };
 
-  const handleDownload = (id: number, title: string) => {
+  const handleDownload = (id: string, title: string) =>
     console.log(`Downloading assignment ${id}: ${title}`);
-  };
+
+  if (isLoading) return <p className="text-center mt-10">Loading...</p>;
+  if (error) return <p className="text-center mt-10">Error: {(error as Error).message}</p>;
 
   return (
     <div className="">
-      {/* Table Container */}
-      <div className="mb-[48px]">
+      <div className="flex justify-between items-center mb-[48px]">
         <PageHeader
           title="Dashboard"
           breadcrumbs={[
@@ -113,7 +110,25 @@ function AssignmentRequest() {
             { label: "Assignments Request" },
           ]}
         />
+
+        <Select
+          value={filterStatus}
+          onValueChange={(value) => {
+            setFilterStatus(value as "pending" | "approved" | "rejected");
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
+
       <div className="overflow-hidden">
         <Table>
           <TableHeader>
@@ -124,129 +139,145 @@ function AssignmentRequest() {
               <TableHead className="font-semibold text-gray-900 text-base py-4 px-6 text-center">
                 Seller Name
               </TableHead>
-              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6">
+              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6 text-center">
                 Price
               </TableHead>
-              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6">
-                Discount Price
+              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6 text-center">
+                Status
               </TableHead>
-              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6">
-                Date & Time
+              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6 text-center">
+                Price Type
               </TableHead>
-              <TableHead className="font-semibold text-gray-900 text-[18px] py-4 px-6 rounded-tr-lg text-center">
+              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6 text-center">
+                Deadline
+              </TableHead>
+              <TableHead className="font-semibold text-gray-900 text-base py-4 px-6 text-center">
                 Action
               </TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {assignmentData.map((item) => (
-              <TableRow
-                key={item.id}
-                className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-              >
-                <TableCell className="text-sm text-gray-700 py-5 px-6">
-                  {item.title}
-                </TableCell>
-                <TableCell className="text-sm text-gray-700 py-5 px-6">
-                  <div className="flex items-center gap-3 justify-center">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage
-                        src={item.sellerAvatar}
-                        alt={item.sellerName}
-                      />
-                      <AvatarFallback>
-                        {item.sellerName
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>{item.sellerName}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm text-gray-700 py-5 px-6">
-                  {item.price}
-                </TableCell>
-                <TableCell className="text-sm text-gray-700 py-5 px-6">
-                  {item.discountPrice}
-                </TableCell>
-                <TableCell className="text-sm text-gray-700 py-5 px-6">
-                  <div>
-                    <div>{item.date}</div>
-                    <div className="text-xs text-gray-500">{item.time}</div>
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm text-gray-700 py-5 px-6 ">
-                  <div className="flex items-center gap-2 justify-center">
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 h-7 rounded"
-                      onClick={() => handleApprove(item.id, item.sellerName)}
-                    >
-                      Approved
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 h-7 rounded"
-                      onClick={() => handleCancel(item.id, item.sellerName)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700 text-white p-1 h-7 w-7 rounded"
-                      onClick={() => handleDownload(item.id, item.title)}
-                    >
-                      <Download className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+            {assignmentData.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                  No assignments found for {filterStatus}
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              assignmentData.map((item) => (
+                <TableRow
+                  key={item._id}
+                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <TableCell className="text-sm text-gray-700 py-5 px-6">{item.title}</TableCell>
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
+                    <div className="flex items-center justify-center gap-2">
+                      <Image
+                        src={item.user.profileImage}
+                        alt={`${item.user.firstName} ${item.user.lastName}`}
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover"
+                      />
+                      <p className="text-gray-900 font-medium text-sm">
+                        {item.user.firstName} {item.user.lastName}
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">{item.budget}</TableCell>
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">{item.status}</TableCell>
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">{item.priceType}</TableCell>
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
+                    {new Date(item.deadLine).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
+                    <div className="flex items-center gap-2 justify-center">
+                      {item.status === "approved" ? (
+                        <CircleCheckBig className="h-6 w-6 text-green-600" />
+                      ) : item.status === "pending" ? (
+                        <>
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 h-7 rounded"
+                            onClick={() => handleApprove(item._id)}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 h-7 rounded"
+                            onClick={() => handleCancel(item._id)}
+                          >
+                            Cancel
+                          </Button>
+                        </>
+                      ) : null}
+
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white p-1 h-7 w-7 rounded"
+                        onClick={() => handleDownload(item._id, item.title)}
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
 
-      {/* Pagination — static design only */}
-      <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
-        <p className="text-sm text-gray-600">Showing 1 to 5 of 5 results</p>
+      {totalResults > limit && (
+        <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+          <p className="text-sm text-gray-600">
+            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, totalResults)} of {totalResults} results
+          </p>
 
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 bg-white border-gray-300"
-            disabled
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-
-          {[1, 2, 3, "...", 10].map((page, index) => (
+          <div className="flex items-center gap-2">
             <Button
-              key={index}
-              variant={page === 1 ? "default" : "outline"}
+              variant="outline"
               size="icon"
-              className={`h-9 w-9 ${
-                page === 1
-                  ? "bg-green-700 hover:bg-green-800 text-white border-green-700"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
-              disabled
+              className="h-9 w-9 bg-white border-gray-300"
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              disabled={page === 1}
             >
-              {page}
+              <ChevronLeft className="h-4 w-4" />
             </Button>
-          ))}
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 bg-white border-gray-300"
-            disabled
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <Button
+                key={p}
+                variant={p === page ? "default" : "outline"}
+                size="icon"
+                className={`h-9 w-9 ${
+                  p === page
+                    ? "bg-green-700 hover:bg-green-800 text-white border-green-700"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                }`}
+                onClick={() => setPage(p)}
+              >
+                {p}
+              </Button>
+            ))}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 bg-white border-gray-300"
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+              disabled={page === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
