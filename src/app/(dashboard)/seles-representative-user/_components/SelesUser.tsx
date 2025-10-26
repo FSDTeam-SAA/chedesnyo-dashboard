@@ -24,7 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import BusinessRepresentativeUser from "./BusinessRepresentativeUser";
+import BusinessRepresentativeUser from "../../business-representative-user/_components/BusinessRepresentativeUser";
+import SelesRepresentativeUser from "./SelesRepresentativeUser";
 
 type SalesUser = {
   _id: string;
@@ -53,8 +54,8 @@ type SalesUserResponse = {
   data: SalesUser[];
 };
 
-// 🧩 All Business Users Table
-function AllBusinessUser({
+// 🧩 Sales Users Table
+function SelesUser({
   selectedFilter,
 }: {
   onTotalChange: (total: number) => void;
@@ -74,7 +75,7 @@ function AllBusinessUser({
     queryKey: ["salesUser", selectedFilter],
     queryFn: async () => {
       const url = new URL(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/all-user?&role=business`
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/all-user?&role=seles`
       );
 
       if (selectedFilter !== "all") {
@@ -251,7 +252,7 @@ function AllBusinessUser({
 }
 
 // 🟢 Main Component
-export default function BusinessUser() {
+export default function MainSelesUser() {
   const [activeTab, setActiveTab] = useState<"all" | "request">("all");
   const [totalResults, setTotalResults] = useState(0);
   const [selectedFilter, setSelectedFilter] = useState("approved"); // ✅ Default approved
@@ -263,7 +264,7 @@ export default function BusinessUser() {
           title="Dashboard"
           breadcrumbs={[
             { label: "Dashboard", href: "/dashboard" },
-            { label: "Business Representative User" },
+            { label: "Sales Representative User" },
           ]}
         />
 
@@ -299,7 +300,7 @@ export default function BusinessUser() {
               : "border-[#008000] text-[#008000] bg-white hover:bg-green-50"
           }`}
         >
-          All Business User
+          All Seles User
         </Button>
 
         <Button
@@ -310,18 +311,18 @@ export default function BusinessUser() {
               : "border-[#008000] text-[#008000] bg-white hover:bg-green-50"
           }`}
         >
-          Request Business User
+          Request Seles User
         </Button>
       </div>
 
       {/* Conditional Rendering */}
       {activeTab === "all" ? (
-        <AllBusinessUser
+        <SelesUser
           onTotalChange={setTotalResults}
           selectedFilter={selectedFilter}
         />
       ) : (
-        <BusinessRepresentativeUser />
+        <SelesRepresentativeUser />
       )}
     </div>
   );

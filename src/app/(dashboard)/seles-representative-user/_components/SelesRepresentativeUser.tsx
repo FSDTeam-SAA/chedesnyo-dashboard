@@ -46,7 +46,7 @@ type BusinessUserResponse = {
   data: BusinessUser[];
 };
 
-function BusinessRepresentativeUser() {
+function SelesRepresentativeUser() {
   const session = useSession();
   const TOKEN = session?.data?.user?.accessToken;
 
@@ -59,7 +59,7 @@ function BusinessRepresentativeUser() {
     queryKey: ["businessUser", currentPage],
     queryFn: async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/all-user?role=business&page=${currentPage}&limit=5&status=pending`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/all-user?role=seles&page=${currentPage}&limit=5&status=pending`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -235,7 +235,7 @@ function BusinessRepresentativeUser() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-6 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-6 text-gray-500">SelesRepresentativeUser
                   No users found.
                 </TableCell>
               </TableRow>
@@ -301,4 +301,4 @@ function BusinessRepresentativeUser() {
   );
 }
 
-export default BusinessRepresentativeUser;
+export default SelesRepresentativeUser;

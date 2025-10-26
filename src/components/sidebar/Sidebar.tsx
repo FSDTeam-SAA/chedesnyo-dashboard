@@ -17,7 +17,8 @@ const navigation = [
   { name: "Assignments Request", href: "/assignments-request", icon: LayoutDashboard },
   { name: "Courses Request", href: "/courses-request", icon: Grip },
   { name: "Business representative User", href: "/business-representative-user", icon: ShoppingBasket },
-  { name: "SR Category List", href: "/sr-category", icon: ShoppingBasket },
+  { name: "Sales Representative User", href: "/seles-representative-user", icon: ShoppingBasket },
+   { name: "Industry List", href: "/industry-list", icon: ShoppingBasket },
 ];
 
 export function Sidebar() {
