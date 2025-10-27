@@ -18,9 +18,9 @@ const navigation = [
   { name: "Courses Request", href: "/courses-request", icon: Grip },
   { name: "Business representative User", href: "/business-representative-user", icon: ShoppingBasket },
   { name: "Sales Representative User", href: "/seles-representative-user", icon: ShoppingBasket },
-   { name: "Industry List", href: "/industry-list", icon: ShoppingBasket },
-   { name: "Blog Management", href: "/blog-management", icon: ShoppingBasket },
-   { name: "Settings", href: "/settings", icon: ShoppingBasket },
+  { name: "Industry List", href: "/industry-list", icon: ShoppingBasket },
+  { name: "Blog Management", href: "/blog-management", icon: ShoppingBasket },
+  { name: "Settings", href: "/settings", icon: ShoppingBasket },
 
 ];
 
@@ -80,9 +80,12 @@ export function Sidebar() {
 
       {/* Logout fixed at bottom */}
       <div className="p-3">
-        <div className="flex items-center justify-start gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-slate-600/50 hover:text-white cursor-pointer">
-          <LogOut className="h-5 w-5" />
-          <span className="font-normal text-base leading-[120%]">Log Out</span>
+        <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer 
+                  bg-gradient-to-r from-red-500/10 to-transparent 
+                  text-red-600 font-semibold text-base transition-all duration-300 
+                  hover:from-red-600 hover:to-red-700 hover:text-white hover:shadow-md">
+          <LogOut className="h-5 w-5 transition-transform duration-300 group-hover:rotate-12" />
+          <span>Log Out</span>
         </div>
       </div>
     </div>
