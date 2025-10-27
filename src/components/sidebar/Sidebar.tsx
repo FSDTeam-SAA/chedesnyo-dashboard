@@ -20,6 +20,8 @@ const navigation = [
   { name: "Sales Representative User", href: "/seles-representative-user", icon: ShoppingBasket },
    { name: "Industry List", href: "/industry-list", icon: ShoppingBasket },
    { name: "Blog Management", href: "/blog-management", icon: ShoppingBasket },
+   { name: "Settings", href: "/settings", icon: ShoppingBasket },
+
 ];
 
 export function Sidebar() {

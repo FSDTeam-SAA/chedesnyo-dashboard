@@ -207,12 +207,16 @@ function BlogList() {
                                         </TableCell>
                                         <TableCell className="py-5 px-6">
                                             <div className="flex items-center justify-end gap-3">
-                                                <button
-                                                    onClick={() => handleEdit(blog._id)}
-                                                    className="text-green-600 hover:text-green-700 transition-colors"
-                                                >
-                                                    <Edit className="h-5 w-5" />
-                                                </button>
+                                                <div className="mt-1.5">
+                                                    <Link href={`/blog-management/edit/${blog._id}`}>
+                                                        <button
+                                                            onClick={() => handleEdit(blog._id)}
+                                                            className="text-green-600 hover:text-green-700 transition-colors"
+                                                        >
+                                                            <Edit className="h-5 w-5" />
+                                                        </button>
+                                                    </Link>
+                                                </div>
                                                 <button
                                                     onClick={() => handleDelete(blog._id)}
                                                     className="text-red-500 hover:text-red-600 transition-colors"
