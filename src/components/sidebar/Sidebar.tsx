@@ -19,6 +19,7 @@ const navigation = [
   { name: "Business representative User", href: "/business-representative-user", icon: ShoppingBasket },
   { name: "Sales Representative User", href: "/seles-representative-user", icon: ShoppingBasket },
    { name: "Industry List", href: "/industry-list", icon: ShoppingBasket },
+   { name: "Blog Management", href: "/blog-management", icon: ShoppingBasket },
 ];
 
 export function Sidebar() {

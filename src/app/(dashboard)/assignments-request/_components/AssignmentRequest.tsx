@@ -33,14 +33,14 @@ type Assignment = {
   priceType: string;
   paymentMethod: string;
   deadLine: string;
-  uploadFile: string;
-  user: {
+  uploadFile?: string;
+  user?: {
     _id: string;
     firstName: string;
     lastName: string;
     email: string;
-    profileImage: string;
-  };
+    profileImage?: string;
+  } | null;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -48,7 +48,9 @@ type Assignment = {
 
 function AssignmentRequest() {
   const [page, setPage] = useState(1);
-  const [filterStatus, setFilterStatus] = useState<"pending" | "approved" | "rejected">("pending");
+  const [filterStatus, setFilterStatus] = useState<
+    "pending" | "approved" | "rejected"
+  >("pending");
   const limit = 7;
   const queryClient = useQueryClient();
   const session = useSession();
@@ -71,19 +73,24 @@ function AssignmentRequest() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/assigment/${id}/status`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-        body: JSON.stringify({ status }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/assigment/${id}/status`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
       if (!res.ok) throw new Error("Failed to update status");
       return res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["assignment", page, filterStatus] });
+      queryClient.invalidateQueries({
+        queryKey: ["assignment", page, filterStatus],
+      });
     },
   });
 
@@ -96,7 +103,8 @@ function AssignmentRequest() {
   };
 
   if (isLoading) return <p className="text-center mt-10">Loading...</p>;
-  if (error) return <p className="text-center mt-10">Error: {(error as Error).message}</p>;
+  if (error)
+    return <p className="text-center mt-10">Error: {(error as Error).message}</p>;
 
   return (
     <div className="">
@@ -158,7 +166,10 @@ function AssignmentRequest() {
           <TableBody>
             {assignmentData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                <TableCell
+                  colSpan={7}
+                  className="text-center py-10 text-gray-500"
+                >
                   No assignments found for {filterStatus}
                 </TableCell>
               </TableRow>
@@ -168,24 +179,50 @@ function AssignmentRequest() {
                   key={item._id}
                   className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                 >
-                  <TableCell className="text-sm text-gray-700 py-5 px-6">{item.title}</TableCell>
-                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <Image
-                        src={item.user.profileImage}
-                        alt={`${item.user.firstName} ${item.user.lastName}`}
-                        width={40}
-                        height={40}
-                        className="rounded-full object-cover"
-                      />
-                      <p className="text-gray-900 font-medium text-sm">
-                        {item.user.firstName} {item.user.lastName}
-                      </p>
-                    </div>
+                  {/* Assignment Title */}
+                  <TableCell className="text-sm text-gray-700 py-5 px-6">
+                    {item.title}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">{item.budget}</TableCell>
-                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">{item.status}</TableCell>
-                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">{item.priceType}</TableCell>
+
+                  {/* Seller Info (Safe Access) */}
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
+                    {item.user ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <Image
+                          src={
+                            item.user.profileImage ||
+                            "/default-avatar.png" // fallback
+                          }
+                          alt={`${item.user.firstName} ${item.user.lastName}`}
+                          width={40}
+                          height={40}
+                          className="rounded-full object-cover"
+                        />
+                        <p className="text-gray-900 font-medium text-sm">
+                          {item.user.firstName} {item.user.lastName}
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 italic">No user info</p>
+                    )}
+                  </TableCell>
+
+                  {/* Budget */}
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
+                    {item.budget}
+                  </TableCell>
+
+                  {/* Status */}
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
+                    {item.status}
+                  </TableCell>
+
+                  {/* Price Type */}
+                  <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
+                    {item.priceType}
+                  </TableCell>
+
+                  {/* Deadline */}
                   <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
                     {new Date(item.deadLine).toLocaleDateString("en-US", {
                       weekday: "short",
@@ -194,6 +231,8 @@ function AssignmentRequest() {
                       day: "numeric",
                     })}
                   </TableCell>
+
+                  {/* Actions */}
                   <TableCell className="text-sm text-gray-700 py-5 px-6 text-center">
                     <div className="flex items-center gap-2 justify-center">
                       {item.status === "approved" ? (
@@ -217,13 +256,6 @@ function AssignmentRequest() {
                         </>
                       ) : null}
 
-                      {/* <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white p-1 h-7 w-7 rounded"
-                        onClick={() => handleDownload(item._id, item.title)}
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                      </Button> */}
                       <AssignmentDialog assigmentId={item._id} />
                     </div>
                   </TableCell>
@@ -234,10 +266,12 @@ function AssignmentRequest() {
         </Table>
       </div>
 
+      {/* Pagination */}
       {totalResults > limit && (
         <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
           <p className="text-sm text-gray-600">
-            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, totalResults)} of {totalResults} results
+            Showing {(page - 1) * limit + 1} to{" "}
+            {Math.min(page * limit, totalResults)} of {totalResults} results
           </p>
 
           <div className="flex items-center gap-2">

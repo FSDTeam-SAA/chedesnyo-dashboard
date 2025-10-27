@@ -25,13 +25,13 @@ type AssignmentResponse = {
     priceType: string;
     paymentMethod: string;
     deadLine: string;
-    user: {
+    user?: {
       _id: string;
       firstName: string;
       lastName: string;
       email: string;
-      profileImage: string;
-    };
+      profileImage?: string;
+    } | null;
     status: string;
     createdAt: string;
     updatedAt: string;
@@ -92,21 +92,25 @@ export function AssignmentDialog({ assigmentId }: { assigmentId: string }) {
             {/* Content */}
             <div className="p-6 space-y-6 bg-white">
               {/* User Info */}
-              <div className="flex items-center gap-3">
-                <Image
-                  src={assignment.user.profileImage}
-                  alt={`${assignment.user.firstName} ${assignment.user.lastName}`}
-                  width={50}
-                  height={50}
-                  className="rounded-full border border-gray-200 object-cover shadow-sm"
-                />
-                <div>
-                  <p className="font-semibold text-gray-900 text-base">
-                    {assignment.user.firstName} {assignment.user.lastName}
-                  </p>
-                  <p className="text-sm text-gray-500">{assignment.user.email}</p>
+              {assignment.user ? (
+                <div className="flex items-center gap-3">
+                  <Image
+                    src={assignment.user.profileImage || "/default-avatar.png"}
+                    alt={`${assignment.user.firstName} ${assignment.user.lastName}`}
+                    width={50}
+                    height={50}
+                    className="rounded-full border border-gray-200 object-cover shadow-sm"
+                  />
+                  <div>
+                    <p className="font-semibold text-gray-900 text-base">
+                      {assignment.user.firstName} {assignment.user.lastName}
+                    </p>
+                    <p className="text-sm text-gray-500">{assignment.user.email}</p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-gray-500 italic">No user information available.</p>
+              )}
 
               {/* Description */}
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 shadow-sm">
@@ -121,18 +125,14 @@ export function AssignmentDialog({ assigmentId }: { assigmentId: string }) {
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Budget
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Budget</p>
                   <p className="text-base font-semibold text-gray-800 mt-1">
                     ${assignment.budget}
                   </p>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Price Type
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Price Type</p>
                   <p className="text-base font-semibold text-gray-800 mt-1 capitalize">
                     {assignment.priceType}
                   </p>
@@ -148,9 +148,7 @@ export function AssignmentDialog({ assigmentId }: { assigmentId: string }) {
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Deadline
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Deadline</p>
                   <p className="text-base font-semibold text-gray-800 mt-1">
                     {new Date(assignment.deadLine).toLocaleDateString("en-US", {
                       weekday: "short",
@@ -179,9 +177,7 @@ export function AssignmentDialog({ assigmentId }: { assigmentId: string }) {
             </div>
           </>
         ) : (
-          <p className="text-center py-6 text-gray-500">
-            No assignment details found.
-          </p>
+          <p className="text-center py-6 text-gray-500">No assignment details found.</p>
         )}
       </DialogContent>
     </Dialog>
