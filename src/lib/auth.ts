@@ -9,6 +9,17 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60, // 7 days
   },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token-dashboard", // 🔹 unique cookie name
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
 
   providers: [
     CredentialsProvider({
@@ -17,7 +28,6 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text", placeholder: "email" },
         password: { label: "Password", type: "password", placeholder: "password" },
       },
-
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Please enter your email and password");
@@ -37,8 +47,6 @@ export const authOptions: NextAuthOptions = {
           );
 
           const response = await res.json();
-          console.log("🟢 Backend login response:", response);
-
           if (!res.ok || !response.success) {
             throw new Error(response?.message || "Login failed");
           }
@@ -47,9 +55,6 @@ export const authOptions: NextAuthOptions = {
           if (!user || !accessToken) {
             throw new Error("Invalid response from server");
           }
-
-          console.log("✅ Received Access Token:", accessToken);
-          console.log("✅ Logged in User:", user);
 
           if (user.role !== "admin") {
             throw new Error("Access denied: only admin users can log in");
@@ -66,7 +71,6 @@ export const authOptions: NextAuthOptions = {
             accessToken,
           };
         } catch (error) {
-          console.error("❌ Authentication error:", error);
           const message =
             error instanceof Error ? error.message : "Authentication failed";
           throw new Error(message);
@@ -86,8 +90,6 @@ export const authOptions: NextAuthOptions = {
         token.location = user.location;
         token.verified = user.verified;
         token.accessToken = user.accessToken;
-
-        console.log("💾 Saved token to JWT:", token);
       }
       return token;
     },
@@ -103,8 +105,6 @@ export const authOptions: NextAuthOptions = {
         verified: token.verified,
         accessToken: token.accessToken,
       };
-
-      console.log("🧠 Session created with token:", session.user.accessToken);
       return session;
     },
   },
