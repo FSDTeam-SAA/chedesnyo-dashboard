@@ -87,7 +87,7 @@ function BusinessRepresentativeUser() {
   const statusUpdateMutation = useMutation({
     mutationFn: async ({ userId, status }: { userId: string; status: string }) => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/${userId}/status`,
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/user/status/${userId}`,
         {
           method: "PUT",
           headers: {
