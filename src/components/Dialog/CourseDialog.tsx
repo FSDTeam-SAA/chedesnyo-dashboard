@@ -52,6 +52,38 @@ export function CourseDialog({ courseId }: { courseId: string }) {
 
   const course = data?.data;
 
+  const getEmbedUrl = (url: string) => {
+    // YouTube Detection
+    const youtubeMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?]+)/);
+    if (youtubeMatch) return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+
+    // Google Drive Detection
+    const driveMatch = url.match(/\/d\/(.+?)\/view/);
+    if (driveMatch) return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+
+    return null;
+  };
+
+  const VideoPlayer = ({ url }: { url: string }) => {
+    const embedUrl = getEmbedUrl(url);
+
+    return embedUrl ? (
+      <iframe
+        src={embedUrl}
+        className="w-full rounded-lg border border-gray-200 shadow-sm"
+        height="250"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+      />
+    ) : (
+      <video
+        controls
+        src={url}
+        className="w-full rounded-lg border border-gray-200 shadow-sm"
+      />
+    );
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -72,7 +104,6 @@ export function CourseDialog({ courseId }: { courseId: string }) {
           </p>
         ) : course ? (
           <>
-            {/* Thumbnail */}
             <div className="relative w-full h-56">
               <Image
                 src={course.thumbnail}
@@ -89,9 +120,7 @@ export function CourseDialog({ courseId }: { courseId: string }) {
               </div>
             </div>
 
-            {/* Content */}
             <div className="p-6 space-y-6 bg-white">
-              {/* Description */}
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 shadow-sm">
                 <h3 className="text-gray-800 font-semibold mb-1 text-sm uppercase tracking-wide">
                   Description
@@ -101,64 +130,50 @@ export function CourseDialog({ courseId }: { courseId: string }) {
                 </p>
               </div>
 
-              {/* Info Grid */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Level
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Level</p>
                   <p className="text-base font-semibold text-gray-800 mt-1 capitalize">
                     {course.level}
                   </p>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Duration
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Duration</p>
                   <p className="text-base font-semibold text-gray-800 mt-1">
                     {course.duration}
                   </p>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Language
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Language</p>
                   <p className="text-base font-semibold text-gray-800 mt-1">
                     {course.language}
                   </p>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Modules
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Modules</p>
                   <p className="text-base font-semibold text-gray-800 mt-1">
                     {course.modules}
                   </p>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Price
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Price</p>
                   <p className="text-base font-semibold text-gray-800 mt-1">
                     ${course.price}
                   </p>
                 </div>
 
                 <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
-                    Discount
-                  </p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">Discount</p>
                   <p className="text-base font-semibold text-gray-800 mt-1">
                     {course.discount}%
                   </p>
                 </div>
               </div>
 
-              {/* Target Audience */}
               <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 shadow-sm">
                 <h3 className="text-gray-800 font-semibold mb-1 text-sm uppercase tracking-wide">
                   Target Audience
@@ -168,34 +183,24 @@ export function CourseDialog({ courseId }: { courseId: string }) {
                 </p>
               </div>
 
-              {/* Videos */}
               <div className="space-y-4">
                 {course.introductionVideo && (
                   <div>
                     <p className="text-xs text-gray-500 uppercase mb-1">
                       Introduction Video
                     </p>
-                    <video
-                      controls
-                      src={course.introductionVideo}
-                      className="w-full rounded-lg border border-gray-200 shadow-sm"
-                    />
+                    <VideoPlayer url={course.introductionVideo} />
                   </div>
                 )}
+
                 {course.courseVideo && (
                   <div>
-                    <p className="text-xs text-gray-500 uppercase mb-1">
-                      Course Video
-                    </p>
-                    <video
-                      controls
-                      src={course.courseVideo}
-                      className="w-full rounded-lg border border-gray-200 shadow-sm"
-                    />
+                    <p className="text-xs text-gray-500 uppercase mb-1">Course Video</p>
+                    <VideoPlayer url={course.courseVideo} />
                   </div>
                 )}
               </div>
-              {/* Status */}
+
               <div className="flex justify-end pt-4">
                 <span
                   className={`px-4 py-1.5 rounded-full text-sm font-medium ${
@@ -212,9 +217,7 @@ export function CourseDialog({ courseId }: { courseId: string }) {
             </div>
           </>
         ) : (
-          <p className="text-center py-6 text-gray-500">
-            No course details found.
-          </p>
+          <p className="text-center py-6 text-gray-500">No course details found.</p>
         )}
       </DialogContent>
     </Dialog>
